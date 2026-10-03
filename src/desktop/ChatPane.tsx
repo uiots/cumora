@@ -1893,11 +1893,15 @@ export function ChatPane() {
   // at render time — by the time the effect runs they're already equal. The
   // flag stays true until messages actually land and we do the instant snap.
   const pendingConvoSwitchRef = useRef(true)
+  // Tracks list size at the previous render, so the own-message follow effect
+  // can tell "my send appended a row" apart from incoming traffic.
+  const prevListCountRef = useRef(0)
   if (lastConvoRef.current !== convoId) {
     lastConvoRef.current = convoId
     initialIdsRef.current = new Set(list.map((m) => m.id))
     pendingConvoSwitchRef.current = true
     animatedIdsRef.current = new Set()
+    prevListCountRef.current = 0
   } else if (initialIdsRef.current === null) {
     initialIdsRef.current = new Set(list.map((m) => m.id))
   }
@@ -1915,6 +1919,23 @@ export function ChatPane() {
       virtuosoRef.current?.scrollToIndex({ index: list.length - 1, align: 'end', behavior: 'auto' })
     }
   }, [list.length, convoId])
+
+  // Own-message unconditional follow. The HELD storm (several agents replying
+  // to one human message in parallel, each bouncing off the server's HELD
+  // gate) churns the list enough that Virtuoso's atBottom estimate drifts
+  // false, and with followOutput="auto" the operator's own outgoing bubble
+  // then renders below the fold — "sent but invisible until restart". The
+  // operator just TYPED the thing: following their own send unconditionally
+  // is the strongest possible scroll intent, so don't trust atBottom here.
+  useEffect(() => {
+    if (list.length === 0 || !meId) return
+    const last = list[list.length - 1]
+    const grew = list.length > prevListCountRef.current
+    prevListCountRef.current = list.length
+    if (grew && last.authorId === meId) {
+      virtuosoRef.current?.scrollToIndex({ index: list.length - 1, align: 'end', behavior: 'auto' })
+    }
+  }, [list.length, list, meId])
 
   // IMPORTANT: every hook in this component must run on EVERY render —
   // React enforces a stable hook order. The "no conversation selected"
