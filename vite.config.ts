@@ -8,12 +8,21 @@ import path from 'node:path'
 const HTTP_TARGET = process.env.CUMORA_DEV_API_TARGET || 'http://localhost:5181'
 const WS_TARGET = HTTP_TARGET.replace(/^http/, 'ws')
 
+// Local-fork identity (electron/fork-config.cjs). Injected so the renderer's
+// OAuth return URL lands on the SAME loopback port the main process listens
+// on — a side-by-side fork uses a different port than the official app, and a
+// mismatch would make the server's 302 land on nothing.
+import { createRequire } from 'node:module'
+const require_ = createRequire(import.meta.url)
+const forkConfig = require_('./electron/fork-config.cjs')
+
 export default defineConfig({
   plugins: [react()],
   // The renderer uses relative URLs through the Vite proxy, but commands
   // copied from the UI run outside that proxy and need the API origin.
   define: {
     'import.meta.env.VITE_CUMORA_DEV_API_TARGET': JSON.stringify(HTTP_TARGET),
+    'import.meta.env.VITE_CUMORA_LOOPBACK_PORT': JSON.stringify(forkConfig.LOOPBACK_PORT),
   },
   resolve: {
     alias: {

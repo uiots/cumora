@@ -132,14 +132,14 @@
     "wait-on": "^8.0.5"
   },
   "build": {
-    "appId": "io.cumora.app",
-    "productName": "Cumora",
+    "appId": "io.cumora.app.dev",
+    "productName": "Cumora Dev",
     "asar": true,
     "protocols": [
       {
-        "name": "Cumora",
+        "name": "Cumora Dev",
         "schemes": [
-          "cumora"
+          "cumoradev"
         ]
       }
     ],
@@ -154,41 +154,20 @@
       "output": "release",
       "buildResources": "build"
     },
-    "publish": [
-      {
-        "provider": "generic",
-        "url": "https://updates.cumora.ai",
-        "channel": "latest",
-        "useMultipleRangeRequest": false
-      },
-      {
-        "provider": "github",
-        "owner": "yetone",
-        "repo": "cumora-releases",
-        "releaseType": "release",
-        "publishAutoUpdate": true
-      }
-    ],
+    "publish": null,
     "mac": {
-      "category": "public.app-category.productivity",
+      "category": "public.app-category.developer-tools",
       "icon": "build/icons/icon.icns",
-      "hardenedRuntime": true,
+      "hardenedRuntime": false,
       "gatekeeperAssess": false,
+      "identity": null,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
-      "notarize": true,
+      "notarize": false,
       "target": [
         {
-          "target": "dmg",
+          "target": "dir",
           "arch": [
-            "x64",
-            "arm64"
-          ]
-        },
-        {
-          "target": "zip",
-          "arch": [
-            "x64",
             "arm64"
           ]
         }

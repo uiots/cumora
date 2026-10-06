@@ -23,6 +23,7 @@
  * silently on next launch.
  */
 const { app, BrowserWindow, ipcMain } = require('electron')
+const forkConfig = require('./fork-config.cjs')
 const { existsSync } = require('node:fs')
 const path = require('node:path')
 
@@ -153,6 +154,14 @@ function registerListeners() {
 }
 
 function initialize() {
+  // A side-by-side fork must never check the official release channel: an
+  // auto-update would replace the fork with the official binary (and the
+  // differing loopback port / deep-link scheme means the fork's own build is
+  // the only one that can actually run this profile).
+  if (forkConfig.DISABLE_AUTO_UPDATE) {
+    LOG.info('Auto-update disabled for local fork build.')
+    return
+  }
   if (!isSupported()) {
     LOG.info(UNSUPPORTED_MSG)
     return

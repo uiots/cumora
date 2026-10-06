@@ -15,6 +15,7 @@ import { useState, useEffect } from 'react'
 import { api, getPairingServerOrigin, getServerOrigin, setServerOrigin } from '@/api/client'
 import { isCapacitorIOS, isElectron } from '@/lib/runtime'
 import { isNativePlatform, nativePlatform, runAppleSignIn, runOAuth } from '@/lib/native'
+import { LOOPBACK_DONE_URL } from '@/lib/loopback'
 import { useAuth } from '@/stores/auth'
 import { CloudLogo } from './Avatar'
 import { WindowDragStrip } from './WindowDragStrip'
@@ -125,7 +126,7 @@ export function AuthScreen() {
       // (anti session-fixation). arm() is Electron-only.
       const auth = window.cumora.auth
       void (async () => {
-        let ret = 'http://127.0.0.1:47823/auth/done'
+        let ret = LOOPBACK_DONE_URL
         try {
           const nonce = await auth.arm?.()
           if (nonce) ret += `?n=${encodeURIComponent(nonce)}`
