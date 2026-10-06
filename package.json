@@ -161,7 +161,6 @@
       "icon": "build/icons-fork/icon.icns",
       "hardenedRuntime": false,
       "gatekeeperAssess": false,
-      "identity": null,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
       "notarize": false,
