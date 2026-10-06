@@ -7,6 +7,17 @@ const crypto = require('node:crypto')
 const { pathToFileURL } = require('node:url')
 const { initialWindowSize } = require('./window-size.cjs')
 const autoUpdater = require('./autoUpdater.cjs')
+const forkConfig = require('./fork-config.cjs')
+
+// Side-by-side fork: namespace the Electron profile BEFORE the single-instance
+// lock is requested. The lock is keyed by userData, so giving the fork its own
+// directory is what lets it and the official app run at the same time; it also
+// keeps cookies / localStorage (auth tokens) and window-state.json from being
+// shared. Without this, whichever app boots second silently quits as a
+// "second instance".
+if (forkConfig.IS_FORK) {
+  app.setPath('userData', path.join(app.getPath('appData'), forkConfig.USER_DATA_DIR_NAME))
+}
 
 const isDev = !app.isPackaged
 const DEV_URL = process.env.ELECTRON_RENDERER_URL || 'http://localhost:5180'
@@ -125,8 +136,8 @@ if (isDev) {
 // Single-instance lock keeps a stray second `cumora` from binding the
 // same loopback port AND lets deep links routed to a NEW process bounce
 // over to the already-running instance via second-instance event below.
-const LOOPBACK_PORT = 47823
-const DEEP_LINK_SCHEME = 'cumora'
+const LOOPBACK_PORT = forkConfig.LOOPBACK_PORT
+const DEEP_LINK_SCHEME = forkConfig.DEEP_LINK_SCHEME
 
 const gotSingleInstance = app.requestSingleInstanceLock()
 if (!gotSingleInstance) {
@@ -373,7 +384,7 @@ const AUTH_DONE_HTML = `<!doctype html>
   const frag = new URLSearchParams({ token });
   if (companyId) frag.set('companyId', companyId);
   if (nonce) frag.set('n', nonce);
-  const deepLink = 'cumora://auth#' + frag.toString();
+  const deepLink = '${DEEP_LINK_SCHEME}://auth#' + frag.toString();
 
   // PRIMARY handoff: POST straight back to the loopback server that served
   // this page. Same origin, so no CORS and no preflight, and the token goes

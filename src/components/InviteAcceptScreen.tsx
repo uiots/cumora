@@ -28,6 +28,7 @@
  */
 import { useCallback, useEffect, useState, useRef } from 'react'
 import { api, type ApiInvitationPreview } from '@/api/client'
+import { LOOPBACK_DONE_URL } from '@/lib/loopback'
 import { useAuth } from '@/stores/auth'
 import { isElectron, isWebAppHost } from '@/lib/runtime'
 import { useT } from '@/lib/i18n'
@@ -487,7 +488,7 @@ function SignInToAccept({ token }: { token: string }) {
       // nonce rides the return URL's query and must match on the inbound token.
       const auth = window.cumora.auth
       void (async () => {
-        let done = 'http://127.0.0.1:47823/auth/done'
+        let done = LOOPBACK_DONE_URL
         try {
           const nonce = await auth.arm?.()
           if (nonce) done += `?n=${encodeURIComponent(nonce)}`
