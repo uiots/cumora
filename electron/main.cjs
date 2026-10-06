@@ -243,7 +243,7 @@ const AUTH_DONE_HTML = `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Cumora — Signed in</title>
+<title>${forkConfig.PRODUCT_NAME} — Signed in</title>
 <style>
   :root { color-scheme: light; }
   * { box-sizing: border-box; }
@@ -314,7 +314,7 @@ const AUTH_DONE_HTML = `<!doctype html>
     <h1 id="h1">You're signed in</h1>
     <p class="sub" id="sub">Ready when you are.</p>
     <button id="open" class="btn">
-      <span id="btn-label">Open Cumora</span>
+      <span id="btn-label">Open ${forkConfig.PRODUCT_NAME}</span>
       <svg class="btn-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M9 6l6 6-6 6"/>
       </svg>
@@ -406,7 +406,7 @@ const AUTH_DONE_HTML = `<!doctype html>
   }).then((r) => {
     if (!r.ok) throw new Error('handoff rejected: ' + r.status);
     h1.textContent = 'Signed in';
-    sub.textContent = 'Cumora has your session.';
+    sub.textContent = forkConfig.PRODUCT_NAME + ' has your session.';
     label.innerHTML = '<span class="ok">✓</span> Signed in';
     btn.disabled = true;
     hint.textContent = 'You can close this tab.';
@@ -429,7 +429,7 @@ const AUTH_DONE_HTML = `<!doctype html>
     setTimeout(() => {
       opened = false;
       btn.disabled = false;
-      label.textContent = 'Open Cumora again';
+      label.textContent = 'Open ' + forkConfig.PRODUCT_NAME + ' again';
     }, 2500);
   });
 })();
@@ -599,8 +599,9 @@ function startAuthLoopback() {
 
 // Resolve once — used for `BrowserWindow.icon` (Win/Linux taskbar) and for
 // `app.dock.setIcon` on macOS so the dock / cmd-tab in dev mode show the
-// cumora cloud instead of Electron's default.
-const ICON_PATH = path.join(app.getAppPath(), 'build', 'icon.png')
+// cumora cloud instead of Electron's default. Fork builds point at their
+// badge-marked icon under build/icons-fork/.
+const ICON_PATH = path.join(app.getAppPath(), 'build', forkConfig.IS_FORK ? 'icons-fork' : '.', 'icon.png')
 const DOCK_ICON_SIZE = 1024
 const DOCK_UNREAD_DOT = {
   cx: 770,
@@ -932,7 +933,7 @@ function buildTrayMenu() {
   return Menu.buildFromTemplate([
     { label: `Cumora v${app.getVersion()}`, enabled: false },
     { type: 'separator' },
-    { label: 'Open Cumora', click: () => {
+    { label: `Open ${forkConfig.PRODUCT_NAME}`, click: () => {
       if (!mainWindow || mainWindow.isDestroyed()) { createWindow(); return }
       if (mainWindow.isMinimized()) mainWindow.restore()
       mainWindow.show()
@@ -959,7 +960,7 @@ function createTray() {
     return
   }
   tray = new Tray(img)
-  tray.setToolTip('Cumora')
+  tray.setToolTip(forkConfig.PRODUCT_NAME)
   // macOS: don't `setContextMenu` — Electron's docs are explicit that
   // doing so swallows the `click` event entirely, making left-click
   // toggle-window impossible. Instead handle `click` ourselves and
