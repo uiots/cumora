@@ -66,6 +66,12 @@ open "/Applications/Cumora Fork.app"
    在仓库根执行会覆盖工作区文件——解包请 `cd /tmp`。
 5. 官方云 CORS 精确放行 `app://cumora` Origin，渲染层的 `app://cumora`
    scheme **不能改名**。
+6. **`identity: null` 会让 launchd 秒杀 app**：electron-builder 跳过 bundle
+   签名后，包内没有 `_CodeSignature/CodeResources`，`open`/Finder/Dock 启动
+   即被杀（直启二进制却正常，极具迷惑性）。修复：去掉 `identity: null`，
+   用 Keychain 里的 Apple Development 证书完整签名（本机开发用足够）。
+7. **LaunchServices 会缓存坏 bundle 的注册**：装过损坏版本后即使重装好包，
+   `open` 仍可能秒退。`lsregister -f <app>` 强制重注册可解。
 
 ## 上游同步
 
